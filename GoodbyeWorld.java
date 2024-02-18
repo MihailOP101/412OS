@@ -10,13 +10,14 @@ public class GoodbyeWorld extends UserLandProcess
 			System.out.println("Goodbye World");
 			try
 			{
-				Thread.sleep(50);
+				Thread.sleep(20);
 			}
 			catch(Exception e)
 			{
 				
-			}
+			}			
 			cooperate();
+			OS.sleep(100);
 		}
 	}
 }

@@ -16,6 +16,7 @@ public class IdleProcess extends UserLandProcess
 			{
 				Thread.currentThread().interrupt();
 			} 
+			
 		}
 		
 	}

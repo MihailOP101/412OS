@@ -17,6 +17,7 @@ public class HelloWorld extends UserLandProcess
 				
 			}
 			cooperate();
+			OS.sleep(10);
 		}
 	}
 }

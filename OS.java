@@ -2,10 +2,24 @@ package opsys;
 
 import java.util.ArrayList;
 
+/**
+ * the enum for the different types of processes
+ */
 enum CallType
 {
 	CREATE_PROCESS,
-	SWITCH_PROCESS
+	SWITCH_PROCESS,
+	SLEEP
+}
+
+/**
+ * the enum for the priority of the activity
+ */
+enum Priority
+{
+	REAL_TIME,
+	INTERACTIVE,
+	BACKGROUND
 }
 
 public class OS 
@@ -15,6 +29,7 @@ public class OS
 	
 	//Shared data for communication between Userland and Kernal
 	public static CallType currentCall;
+	public static Priority priority;
 	public static ArrayList<Object> parameters = new ArrayList<>();
     public static Object returnValue;
     
@@ -38,20 +53,54 @@ public class OS
     	kernal.start();
     	if (kernal.scheduler.currentProcess != null)
     	{
-    		OS.debugMessage("OS.switchToKernal() : if");
+    		OS.debugMessage("OS.switchToKernal() : if PCB not null");
     		kernal.scheduler.currentProcess.stop();
     	}
     }
     
-    //Method to make an enum entry for CreateProcess, and follow the steps above
-	public static int CreateProcess(UserLandProcess up)
-	{
-		OS.debugMessage("OS.CreateProcess()");
+    public static int CreateProcess(UserLandProcess up)
+    {
+    	OS.debugMessage("OS.CreateProcess() : up");
     	//Clears parameters
     	parameters.clear();
     
     	//Adds a new parameters to the Kernal
     	parameters.add(up);
+    
+    	//Adds a priority parameter to the Kernal 
+    	parameters.add(Priority.INTERACTIVE);
+    	
+    	//Sets the currentCall
+    	currentCall = CallType.CREATE_PROCESS;
+    	
+		switchToKernal();
+
+		while(true)
+		{
+			try
+			{
+				OS.debugMessage("OS.CreateProcess() : while.try 1");
+				return (int) returnValue;
+			}
+			catch(Exception e)
+			{
+				
+			}
+		}
+    }
+    
+    //Method to make an enum entry for CreateProcess, and follow the steps above
+	public static int CreateProcess(UserLandProcess up, Priority priority)
+	{
+		OS.debugMessage("OS.CreateProcess() : up and priority");
+    	//Clears parameters
+    	parameters.clear();
+    
+    	//Adds a ULP parameter to the Kernal
+    	parameters.add(up);
+    	
+    	//Adds a priority parameter to the Kernal 
+    	parameters.add(priority);
     
     	//Sets the currentCall
     	currentCall = CallType.CREATE_PROCESS;
@@ -62,7 +111,7 @@ public class OS
 		{
 			try
 			{
-				OS.debugMessage("OS.CreateProcess() : while.try");
+				OS.debugMessage("OS.CreateProcess() : while.try 2");
 				return (int) returnValue;
 			}
 			catch(Exception e)
@@ -80,16 +129,30 @@ public class OS
 		//Calls create process to initialize the kernal
 		CreateProcess(init);
 		
+		
 		//Calls idleProcess and calls createProcess for it
 		IdleProcess idleProc = new IdleProcess();
-		CreateProcess(idleProc);
+		CreateProcess(idleProc, Priority.BACKGROUND);
 	}
 
+	/**
+	 * 
+	 * @param milliseconds calls the Kernal's sleep process for an amount of milliseconds
+	 */
+	public static void sleep(int milliseconds)
+	{
+		parameters.clear();
+		parameters.add(milliseconds);
+		currentCall = CallType.SLEEP;
+		switchToKernal();
+	}
+	
 	//Creates the debug messages to show the steps
 	public static void debugMessage(String message)
 	{
 		//comment out to stop getting most of the messages
-//		System.out.println(message);
+//		System.out.println('\t' + message);
 	}
+	
 	
 }
